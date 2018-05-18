@@ -1,0 +1,10 @@
+# HadoopGeoCompute
+基于Hadoop分布式计算框架的地理栅格数据的分布式计算方法
+
+本项目实现了一下功能点：
+
+1.实现了基于HDFS的瓦片栅格文件的切割以及瓦片栅格文件的压缩；
+
+2.针对瓦片栅格文件的存储策略，设计并实现了基于Hadoop的分布式栅格数据地图代数计算，包括Add、GreaterThan、LocalMax以及MountainReclassify等算法；
+
+3.利用集群的GPU计算资源，采用JCuda结合Hadoop，实现能够利用集群GPU资源的Hadoop分布式栅格数据地图代数算法。
