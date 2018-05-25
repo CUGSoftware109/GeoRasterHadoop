@@ -3,6 +3,7 @@
 
   HadoopGeoCompute is a distributed storage and map algebraic parallel algorithm based on Hadoop distributed computing framework. It is divided into tile-based storage strategy on HDFS for raster data and map algebraic parallel algorithm based on distributed tile storage strategy. 
 
+[Chinese-Introduction](https://github.com/CUGSoftware109/HadoopGeoCompute/blob/master/README_CN.md)
 
 # Function
 
