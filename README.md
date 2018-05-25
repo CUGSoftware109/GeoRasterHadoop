@@ -1,9 +1,9 @@
-# HadoopGeoCompute
+# GeoRasterHadoop
 
 
-  HadoopGeoCompute is a distributed storage and map algebraic parallel algorithm based on Hadoop distributed computing framework. It is divided into tile-based storage strategy on HDFS for raster data and map algebraic parallel algorithm based on distributed tile storage strategy. 
+  GeoRasterHadoop is a distributed storage and map algebraic parallel algorithm based on Hadoop distributed computing framework. It is divided into tile-based storage strategy on HDFS for raster data and map algebraic parallel algorithm based on distributed tile storage strategy. 
 
-[Chinese-Introduction](https://github.com/CUGSoftware109/HadoopGeoCompute/blob/master/README_CN.md)
+[Chinese-Introduction](https://github.com/CUGSoftware109/GeoRasterHadoop/blob/master/README_CN.md)
 
 # Function
 
@@ -11,7 +11,7 @@
 
 2.For the storage strategy of tile raster files, a distributed raster data map algebra calculation based on Hadoop is designed and implemented, including Add, GreaterThan, LocalMax, and MountainReclassify algorithms.
 
-3.Using clustered GPU computing resources, Cuda is combined with Hadoop to implement a Hadoop distributed raster data map algebraic algorithm that can utilize clustered GPU resources.
+
 
 
 # Project structure
@@ -26,8 +26,6 @@
 
 /src/main/java/cug/hadoop/geo/algorithm/：This package is an implementation class for Hadoop distributed map algebraic calculations, including distributed map algebraic algorithms such as Add, GreaterThan, LocalMax, and MountainReclassify.
 
-/src/main/java/cug/hadoop/geo/algorithm/gpu/：Under this package is a distributed algorithm implementation for map algebra calculations in the Hadoop+GPU environment. This algorithm uses Hadoop clusters to accelerate parallel computing tasks while fully utilizing GPU physical resources on a single compute node to speed up the calculation of individual tasks. , Reduce the overall time for computing tasks.
-
 /src/main/java/cug/hadoop/geo/utils/：Various tools used in the implementation process.
 
 
@@ -35,7 +33,7 @@
 
 # Running Environment and Development Tools
 
-Running Environment：Centos6.5、JDK1.7、Hadoop2.6.0、zookeeper-3.4.8、HBase-1.1.4、CUDA8
+Running Environment：Centos6.5、JDK1.7、Hadoop2.6.0、zookeeper-3.4.8、HBase-1.1.4
 
 Development Tools：Eclipse、Maven
 
