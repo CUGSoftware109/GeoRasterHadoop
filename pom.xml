@@ -43,13 +43,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     		<version>1.6</version>  
     		<scope>system</scope>  
     		<systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>  
-		</dependency>  
-		
-		<dependency>
-            <groupId>org.jcuda</groupId>
-            <artifactId>jcuda</artifactId>
-            <version>0.8.0</version>
-        </dependency>
+	</dependency>  
 		
     </dependencies>
   
