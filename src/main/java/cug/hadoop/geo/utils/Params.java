@@ -13,11 +13,11 @@ public class Params {
 			byte[] bytes = new byte[2048];
 			fis.read(bytes);
 			String s= new  String(bytes, "utf-8");
-			s=s.replaceAll("( )( )+"," ");// 去掉字符中间多于2个的空格
-			s =s .trim();//去掉首尾多余的空格
+			s=s.replaceAll("( )( )+"," ");
+			s =s .trim();
 			String[] params =s.split(" ");
 			if(params.length!=4){
-				System.out.println("参数错误！");
+				System.out.println("Parameter error！");
 				return null;
 			}
 			params[1] = params[1].trim();

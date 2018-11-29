@@ -17,7 +17,6 @@ public class HBaseClient {
 	static Configuration cfg = HBaseConfiguration.create();
 	
 	/**
-	 * 鎻掑叆璁板綍
 	 * @param tableName
 	 * @param rowKey
 	 * @param v
@@ -36,7 +35,6 @@ public class HBaseClient {
 	}
 			
 	/**
-	 * 鏌ヨ涓�鏉¤褰�
 	 * @param tablename
 	 * @param rowKey
 	 * @throws IOException

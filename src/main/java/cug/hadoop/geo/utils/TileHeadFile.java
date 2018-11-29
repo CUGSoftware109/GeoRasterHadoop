@@ -13,13 +13,13 @@ import java.io.IOException;
  */
 public class TileHeadFile {
 
-	private  int COL;//grd数据的像素列
-	private  int ROW;//grd数据的像素行
-	private  int COL_NUM=0;//数据块的列数
-	private  int ROW_NUM=0;//数据块的行数
-	private  short COL_ADD;//数据需要填充的像素列
-	private  short ROW_ADD;//数据需要填充的像素行
-   private  short TILE_SIZE;//瓦片尺寸
+	private  int COL;
+	private  int ROW;
+	private  int COL_NUM=0;
+	private  int ROW_NUM=0;
+	private  short COL_ADD;
+	private  short ROW_ADD;
+   private  short TILE_SIZE;
 	private double x1,x2,y1,y2,z1,z2;	
 	
 	public TileHeadFile(int ROW,int COL,double x1,double x2,double y1,double y2,double z1,
@@ -48,7 +48,7 @@ public class TileHeadFile {
 	}
 
 	/**
-	 * 写头文件
+	 * write header
 	 * @throws IOException
 	 */
 	public void writeHeadFile(String path) {

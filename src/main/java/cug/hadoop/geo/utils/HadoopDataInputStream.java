@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * 自定义DataInputStream类，方便用来读取反向的字节数据
+ * Custom DataInputStream class for easy reading of reverse byte data
  * @author root
  *
  */
