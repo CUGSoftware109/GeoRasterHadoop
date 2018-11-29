@@ -36,8 +36,7 @@ public class TileRecordReader extends RecordReader<LongWritable, BytesWritable> 
   public TileRecordReader() throws IOException {
   }
 
-  /*关闭文件流
-   * */
+
   public void close() {
     try {
       if(inputStream != null)
@@ -49,30 +48,26 @@ public class TileRecordReader extends RecordReader<LongWritable, BytesWritable> 
   }
 
   /*
-   * 获取处理进度
+   * Get processing progress
    **/
   public float getProgress() {
     return ((processed == true)? 1.0f : 0.0f);
   }
 
-  /*
-   * 获取当前的Key
-   * */
   public LongWritable getCurrentKey() throws IOException,
   InterruptedException {
     // TODO Auto-generated method stub
     return key;
   }
 
-  /* 获取当前的Value
-   * */
+
   public BytesWritable getCurrentValue() throws IOException,InterruptedException {
     // TODO Auto-generated method stub
     return value;
   }
 
   /*
-   * 进行初始化工作，打开文件流，根据分块信息设置起始位置和长度等等
+   * Initialize work, open the file stream, set the starting position and length according to the block information, etc.
    * */
   public void initialize(InputSplit inputSplit, TaskAttemptContext context)
       throws IOException, InterruptedException {
@@ -90,8 +85,7 @@ public class TileRecordReader extends RecordReader<LongWritable, BytesWritable> 
 	 this.pos = this.start;   
   }
 
-  /*生成下一个键值对
-   **/
+
   public boolean nextKeyValue() throws IOException, InterruptedException {
     // TODO Auto-generated method stub
 	 
@@ -104,11 +98,10 @@ public class TileRecordReader extends RecordReader<LongWritable, BytesWritable> 
     	   if(end-pos>=4){
     	       key.set(mydis.readInt());
     	       if(key.get()==0){
-    	    	   //System.out.println("分片读取结束！！！！！！！！！！！！！");
-    	    	   processed = true;    	    	  
+    	    	   processed = true;
        		   return false;
        	         }
-    	    }else{// 如果当前位置距离文件末尾不足4个字节，则必定后面为填充无用数据
+    	    }else{
     	      	processed = true;    	    	  
         		   return false;
     	    }

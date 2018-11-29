@@ -113,12 +113,9 @@ public class LocalMax {
   }
 
   public static void main(String[] args) throws Exception {
-    /**  
-    * JobConf：map/reduce的job配置类，向hadoop框架描述map-reduce执行的工作  
-    * 构造方法：JobConf()、JobConf(Class exampleClass)、JobConf(Configuration conf)等  
-    */    
+
 	  if(args.length !=6){
-			System.out.println("参数个数不匹配，应为6");
+			System.out.println("The number of parameters does not match and should be 6");
 			return;
 	 }	 
 	 Configuration conf = new Configuration();  
@@ -131,15 +128,15 @@ public class LocalMax {
 	 conf.set("mapreduce.map.output.compress","true");
 	 }
 	 conf.setBoolean("dfs.support.append", true);
-	 Job job = Job.getInstance(conf, "localMax");//Job(Configuration conf, String jobName) 设置job名称和  
+	 Job job = Job.getInstance(conf, "localMax");//Job(Configuration conf, String jobName)
 	 job.setJarByClass(LocalMax.class);  
 	 
-	 job.setMapperClass(TokenizerMapper.class); //为job设置Mapper类   
-	 //job.setCombinerClass(IntSumReducer.class); //为job设置Combiner类    
-	 job.setReducerClass(IntSumReducer.class); //为job设置Reduce类     
+	 job.setMapperClass(TokenizerMapper.class);
+	 //job.setCombinerClass(IntSumReducer.class);
+	 job.setReducerClass(IntSumReducer.class);
 	 
-	 job.setOutputKeyClass(LongWritable.class);        //设置输出key的类型  
-	 job.setOutputValueClass(BytesWritable.class);//  设置输出value的类型 
+	 job.setOutputKeyClass(LongWritable.class);
+	 job.setOutputValueClass(BytesWritable.class);
 	 job.setInputFormatClass(TileInputFormat.class);
 	 job.setOutputFormatClass(TileOutputFormat.class);
 	 job.setPartitionerClass(TotalOrderPartitioner.class);
@@ -154,22 +151,18 @@ public class LocalMax {
 	 String outputPath="hdfs://master:9000"+s3;
 	 FileInputFormat.addInputPath(job, new Path(inputPath1)); 
 	 FileInputFormat.addInputPath(job, new Path(inputPath2)); 
-	 FileOutputFormat.setOutputPath(job, new Path(outputPath));//为map-reduce任务设置OutputFormat实现类  设置输出路径
-	 long startMili=System.currentTimeMillis();// 当前时间对应的毫秒数
+	 FileOutputFormat.setOutputPath(job, new Path(outputPath));
+	 long startMili=System.currentTimeMillis();
 	 if(tasksNum>1){
-	 // RandomSampler第一个参数表示key会被选中的概率，第二个参数是一个选取samples数，第三个参数是最大读取input splits数
-		 RandomSampler<LongWritable, BytesWritable> sampler = new InputSampler.RandomSampler<LongWritable, BytesWritable>(0.1, 1000, 10);	 
-		 // 设置partition file全路径到conf  
-	  //  TotalOrderPartitioner.setPartitionFile(conf, partitionFile);     
-	     // 写partition file到mapreduce.totalorderpartitioner.path  
-	    InputSampler.writePartitionFile(job, sampler); 
+	 	RandomSampler<LongWritable, BytesWritable> sampler = new InputSampler.RandomSampler<LongWritable, BytesWritable>(0.1, 1000, 10);
+	    InputSampler.writePartitionFile(job, sampler);
 	    String partitionFile = TotalOrderPartitioner.getPartitionFile(conf);
-	    URI partitionUri= new URI(partitionFile);//？？
-	    job.addCacheArchive(partitionUri);//添加一个档案进行本地化
+	    URI partitionUri= new URI(partitionFile);
+	    job.addCacheArchive(partitionUri);
 	 }
 	 boolean state= job.waitForCompletion(true);
 	 long endMili=System.currentTimeMillis();
-	 System.out.println("总耗时为："+(endMili-startMili)+"毫秒");
+	 System.out.println("total time："+(endMili-startMili)+"miniSecond");
 	 System.exit(state? 0 : 1);  
   }
 }

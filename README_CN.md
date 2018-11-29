@@ -39,3 +39,8 @@
 开发工具：Eclipse、Maven
 
 
+# 如何运行项目
+
+瓦片切分：运行/src/main/java/cug/hadoop/geo/tile/split目录下的ZIPTile类，将目标栅格数据文件切分为瓦片文件。
+
+分布式算子运行：选择/src/main/java/cug/hadoop/geo/algorithm/下的某个类作为入口类打包为jar，将jar包上传到集群服务器，使用Hadoop命令运行jar。

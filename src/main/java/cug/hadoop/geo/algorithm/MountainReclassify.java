@@ -29,7 +29,7 @@ import cug.hadoop.geo.utils.ClassifyMsg;
 import cug.hadoop.geo.fileFormat.TileOutputFormat;
 import cug.hadoop.geo.fileFormat.TileInputFormat;
 
-//压缩瓦片文件
+//Compress tile file
 public class MountainReclassify {	
 		  public static class MyMapper extends Mapper<LongWritable, BytesWritable, LongWritable, BytesWritable>{
 			
@@ -61,12 +61,12 @@ public class MountainReclassify {
  *
  */
 public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWritable,BytesWritable> { 
-	   private static final float INVAILDDATA=1.70141E38f;//填充的无用数据，与地图中无用数据一致，为1.70141E38
-	   private static ArrayList<ClassifyMsg> classifyMsgList; //保存元组信息到该list中
-		public static long[] sumList;//统计每个元组中的元素个数	
+	   private static final float INVAILDDATA=1.70141E38f;
+	   private static ArrayList<ClassifyMsg> classifyMsgList;
+		public static long[] sumList;
 		
 		/**
-		 * 解析元组信息，存入classifyMsgList中
+		 * Parse tuple information and store it in classifyMsgList
 		 * @param classify_inputPath
 		 * @return
 		 * @throws IOException
@@ -81,17 +81,17 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
 			  	   byte[] bytes = new byte[4096];
 				   fsis.read(bytes);
 				   String s= new  String(bytes, "utf-8");
-				   s=s.replaceAll("( )( )+","");// 去掉字符中间多于2个的空格
-				   s =s.trim();//去掉首尾多余的空格
-			      String[] yuanzu =s.split(" ");//按空格分割元组
-			      sumList = new long[yuanzu.length+1];//求和数组共有元组个数加一项，多的一项为为补充0.0f的
+				   s=s.replaceAll("( )( )+","");
+				   s =s.trim();
+			      String[] yuanzu =s.split(" ");
+			      sumList = new long[yuanzu.length+1];
 			      for(int i = 0; i <yuanzu.length;i++){
 			    	  yuanzu[i] = yuanzu[i].replace("(", " ");
 			    	  yuanzu[i] = yuanzu[i].replace(")", " ");
 			    	  yuanzu[i] = yuanzu[i].trim();
 			    	  String[] px = yuanzu[i].split(",");
 			    	  if(px.length!=3){
-			    		  System.out.println("参数格式不正确！");
+			    		  System.out.println("The parameter format is incorrect！");
 			    		  System.exit(0);
 			    	  }
 			    	  float min = Float.parseFloat(px[0]);
@@ -111,12 +111,7 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
 		    }	
 		}
 		
-		/**
-		 * 辅助类，bytes转int
-		 * @param b
-		 * @param start
-		 * @return
-		 */
+
 		public int fromBytestoInt(byte[] b,int start){
 			 int temp;
 			 if(b.length >= start+4)
@@ -126,12 +121,7 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
 			 return temp;
 		}
 	
-		/**
-		 * 辅助类，bytes转Float
-		 * @param b
-		 * @param start
-		 * @return
-		 */
+
 		public Float fromBytestoFloat(byte[] b,int start){
 			 float temp;
 			 int tempi = fromBytestoInt(b,start);
@@ -144,15 +134,13 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
     public void reduce(LongWritable key, Iterable<BytesWritable> values, 
         Context context) throws IOException, InterruptedException {				
             	Iterator<BytesWritable> ite = values.iterator();
-            		// 利用valueList准备存储values中的所有值
-            	List<byte[]> valueList = new ArrayList<>(); 
+            	List<byte[]> valueList = new ArrayList<byte[]>();
             	while(ite.hasNext()){
             		valueList.add(ite.next().copyBytes());
             	    }
-            	 //如果小于2个块，说明坡度数据和高程数据中存在一个无效块，则重分类后必为无效块，所以这里直接写出无效块而无需再计算
             	    if(valueList.size()<2)
             	    {
-            	    	 int length = (valueList.get(0)).length-4;// 无效块的字节长度
+            	    	 int length = (valueList.get(0)).length-4;
             	    	 int temp_data = Float.floatToIntBits(INVAILDDATA);
          	          byte[] result_bytes = new byte[length];
             	    	 for(int i = 0;i<length;i+=4){
@@ -165,13 +153,11 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
             	    	 return;
             	    	
             	    }
-                              //区分坡度数据与高程数据
             	    	  byte[] bElevation = valueList.get(0);
             	    	  byte[] bSlope = valueList.get(1);
-            	    	      //获取bElevation和bSlope的第一个int值，判断bElevation和bSlope分别属于哪类数据
             	    	  int rasId0 = fromBytestoInt(bElevation, 0);
             	    	  int rasId1 = fromBytestoInt(bSlope, 0);
-            	    	  
+
             	    	  if(rasId0 == 0&&rasId1 == 1){}
             	    	  else if(rasId0 == 1&& rasId1 ==0){
             	    		    bElevation = valueList.get(1);
@@ -182,38 +168,38 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
             	    		    System.exit(0);
             	    	       }           	    	      	
             				float currentElevation,currentSlope;
-            				int length = bElevation.length;//字节数组长度 
+            				int length = bElevation.length;
             				float[] change_tile = new float[length/4-1];		
             				    
             	         for(int j = 4;j<length;j+=4){
             	            	currentElevation = fromBytestoFloat(bElevation, j);
             	            	currentSlope = fromBytestoFloat(bSlope, j);
-            	           	    change_tile[j/4-1] = currentElevation;//当前值先初始化为当前float数值
-            	           	    if(change_tile[j/4-1]==1.70141E38f){ //如果chang_tile[j/4]的值是无效值，则无用值赋为0      	    
+            	           	    change_tile[j/4-1] = currentElevation;
+            	           	    if(change_tile[j/4-1]==1.70141E38f){
             	        	            //change_tile[j/4] = 0.0f;
-            	        	           // sumList[classifyMsgList.size()]+=1L;//最后无用项计数
+            	        	           // sumList[classifyMsgList.size()]+=1L;
             	        	            continue;
             	                          }
     	           	    					if(currentElevation>=4500.0f){
-    	           	            	      change_tile[j/4-1] = 1.0f;  //山地类型1
+    	           	            	      change_tile[j/4-1] = 1.0f;
     	           	                        }
     	           	    					else if(currentElevation>=3500.0f && currentElevation < 4500.0f){
-    	           	    						change_tile[j/4-1] = 2.0f;   //山地类型2
+    	           	    						change_tile[j/4-1] = 2.0f;
     	           	    					}
     	           	    					else if(currentElevation>=2500.0f && currentElevation < 3500.0f){
-    	           	    						change_tile[j/4-1] = 3.0f;   //山地类型3
+    	           	    						change_tile[j/4-1] = 3.0f;
     	           	    					}
     	           	    					else if(currentElevation>=1500.0f && currentElevation <2500.0f && currentSlope >= 2.0f){
-    	           	    						change_tile[j/4-1] = 4.0f;   //山地类型4
+    	           	    						change_tile[j/4-1] = 4.0f;
     	           	    					}
     	           	    					else if(currentElevation>=1500.0f && currentElevation <1000.0f && currentSlope >= 5.0f){
-           	    						      change_tile[j/4-1] = 5.0f;   //山地类型5
+           	    						      change_tile[j/4-1] = 5.0f;
            	    					        }
     	           	    					else if(currentElevation >= 300.0f && currentElevation < 1000.0f){
-           	    						      change_tile[j/4-1] = 6.0f;   //山地类型6
+           	    						      change_tile[j/4-1] = 6.0f;
            	    					        }
     	           	    					else{
-    	           	    						change_tile[j/4-1] = 7.0f; //非山地
+    	           	    						change_tile[j/4-1] = 7.0f;
     	           	    					}
     	           	    
             	           }
@@ -233,12 +219,9 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
   public static void main(String[] args) throws Exception {
 	    
 				    Configuration conf = new Configuration();         	   
-			    /**  
-			    * JobConf：map/reduce的job配置类，向hadoop框架描述map-reduce执行的工作  
-			    * 构造方法：JobConf()、JobConf(Class exampleClass)、JobConf(Configuration conf)等  
-			    */    
+
 				 if(args.length !=7){
-						System.out.println("需要的7个参数不匹配，应为inputPath1,inputPath2,tupleInputPath,outputPath,reduceTaskNum,mapCpmpress,reduceCompress");
+						System.out.println("The required 7 parameters do not match and should be: inputPath1,inputPath2,tupleInputPath,outputPath,reduceTaskNum,mapCpmpress,reduceCompress");
 						return;
 				 }	  
 			  
@@ -250,14 +233,14 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
 				   conf.setClass("mapreduce.output.fileoutputformat.compress.codec",GzipCodec.class, CompressionCodec.class);	 
 				 }
 				 conf.setBoolean("dfs.support.append", true);
-				 //Job job = new Job(conf, "Reclassify");//Job(Configuration conf, String jobName) 设置job名称
+				 //Job job = new Job(conf, "Reclassify");//Job(Configuration conf, String jobName)
 				 Job job =Job.getInstance(conf, "MountainReclassify");
 				 job.setJarByClass(MountainReclassify.class);  	 
-				 job.setMapperClass(MyMapper.class); //为job设置Mapper类   
-				// job.setCombinerClass(MyReducer.class); //为job设置Combiner类    
-				 job.setReducerClass(MyReducer.class); //为job设置Reduce类     
-				 job.setOutputKeyClass(LongWritable.class);        //设置输出key的类型  
-				 job.setOutputValueClass(BytesWritable.class);//  设置输出value的类型 
+				 job.setMapperClass(MyMapper.class);
+				// job.setCombinerClass(MyReducer.class);
+				 job.setReducerClass(MyReducer.class);
+				 job.setOutputKeyClass(LongWritable.class);
+				 job.setOutputValueClass(BytesWritable.class);
 				 job.setInputFormatClass(TileInputFormat.class);
 				 job.setOutputFormatClass(TileOutputFormat.class);
 				 String s1 = args[0];
@@ -269,25 +252,24 @@ public static class MyReducer extends Reducer<LongWritable,BytesWritable,LongWri
 			    String outputPath="hdfs://master:9000"+s3;
 				 TileInputFormat.addInputPath(job, new Path(inputPath1)); 
 				 TileInputFormat.addInputPath(job, new Path(inputPath2)); 
-				 TileOutputFormat.setOutputPath(job, new Path(outputPath));//为map-reduce任务设置OutputFormat实现类  设置输出路径
+				 TileOutputFormat.setOutputPath(job, new Path(outputPath));
 				 int tasksNum = Integer.parseInt(args[4]);
 				 job.setNumReduceTasks(tasksNum);
 				 
-				 long startMili=System.currentTimeMillis();// 当前时间对应的毫秒数
+				 long startMili=System.currentTimeMillis();
 				 if(tasksNum>1){
 				 job.setPartitionerClass(TotalOrderPartitioner.class);
-				 // RandomSampler第一个参数表示key会被选中的概率，第二个参数是一个选取samples数，第三个参数是最大读取input splits数
 				 RandomSampler<LongWritable, BytesWritable> sampler = new InputSampler.RandomSampler<LongWritable, BytesWritable>(0.1, 5000, 20);
 			    InputSampler.writePartitionFile(job, sampler); 
 			    String partitionFile = TotalOrderPartitioner.getPartitionFile(conf);
-			    URI partitionUri= new URI(partitionFile);//？？
-			    job.addCacheArchive(partitionUri);//添加一个档案进行本地化
+			    URI partitionUri= new URI(partitionFile);
+			    job.addCacheArchive(partitionUri);
 				 }
 				
 				
 				 boolean state= job.waitForCompletion(true);
 				 long endMili=System.currentTimeMillis();
-				 System.out.println("总耗时为："+(endMili-startMili)+"毫秒");
+				 System.out.println("Total time is："+(endMili-startMili)+"millisecond");
 				 
 				/* for(int i = 0;i<MyMapper.sumList.length;i++){
 					      System.out.println(MyMapper.sumList[i]);

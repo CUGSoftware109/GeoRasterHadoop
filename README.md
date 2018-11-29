@@ -38,3 +38,8 @@ Running Environment：Centos6.5、JDK1.7、Hadoop2.6.0、zookeeper-3.4.8、HBase
 Development Tools：Eclipse、Maven
 
 
+# How to run
+
+Tile splitting: Run the ZIPTile class in the /src/main/java/cug/hadoop/geo/tile/split directory to split the target raster data file into tile files.
+
+Distributed operator operation: Select a class under /src/main/java/cug/hadoop/geo/algorithm/ as the entry class to be packaged as a jar, upload the jar package to the cluster server, and run the jar using the Hadoop command.

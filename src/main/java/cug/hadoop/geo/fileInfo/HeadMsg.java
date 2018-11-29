@@ -7,13 +7,13 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import cug.hadoop.geo.utils.TileSplitDataInputStream;
 
 public class HeadMsg {
-	private  int COL;//grd数据的像素列
-	private  int ROW;//grd数据的像素行
-	private  int COL_NUM=0;//数据块的列数
-	private  int ROW_NUM=0;//数据块的行数
-	private  short COL_ADD;//数据需要填充的像素列
-	private  short ROW_ADD;//数据需要填充的像素行
-   private  short TILE_SIZE;//瓦片尺寸
+	private  int COL;//Pixel column of grd data
+	private  int ROW;//Pixel row of grd data
+	private  int COL_NUM=0;//Number of columns in the data block
+	private  int ROW_NUM=0;//Number of rows in the data block
+	private  short COL_ADD;//The pixel column that the data needs to fill
+	private  short ROW_ADD;//The row of pixels that the data needs to fill
+   private  short TILE_SIZE;
 	private double x1,x2,y1,y2,z1,z2;
 	
 	public HeadMsg(FSDataInputStream fsis){

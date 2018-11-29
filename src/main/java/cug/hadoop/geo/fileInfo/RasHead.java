@@ -11,7 +11,7 @@ import cug.hadoop.geo.utils.TileSplitDataInputStream;
 import cug.hadoop.geo.utils.TileSplitDataOutputStream;
 
 
-//头文件类
+//File header class
 public class RasHead {
 
 	private int nx;

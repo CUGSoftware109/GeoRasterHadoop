@@ -29,13 +29,11 @@ import cug.hadoop.geo.fileFormat.TileOutputFormat;
 import cug.hadoop.geo.utils.ClassifyMsg;
 
 
-//压缩瓦片文件
 public class GreaterThan {
 	public static class MyMapper extends Mapper<LongWritable, BytesWritable, LongWritable, BytesWritable> {
 
 		public void map(LongWritable key, BytesWritable value, Context context)
 				throws IOException, InterruptedException {
-			// 瓦片解压**************************************************
 			byte[] bytes = value.copyBytes();
 			byte[] b = null;
 			ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
@@ -62,13 +60,13 @@ public class GreaterThan {
 	 *
 	 */
 	public static class MyReducer extends Reducer<LongWritable, BytesWritable, LongWritable, BytesWritable> {
-		private static final float INVAILDDATA = 1.70141E38f;// 填充的无用数据，与地图中无用数据一致，为1.70141E38
+		private static final float INVAILDDATA = 1.70141E38f;
 		private static final float GREATER_THAN_PARAM = 500.0f;
-		private static ArrayList<ClassifyMsg> classifyMsgList; // 保存元组信息到该list中
-		public static long[] sumList;// 统计每个元组中的元素个数
+		private static ArrayList<ClassifyMsg> classifyMsgList;
+		public static long[] sumList;
 
 		/**
-		 * 解析元组信息，存入classifyMsgList中
+		 * Parse tuple information and store it in classifyMsgList
 		 * 
 		 * @param classify_inputPath
 		 * @return
@@ -84,17 +82,17 @@ public class GreaterThan {
 				byte[] bytes = new byte[4096];
 				fsis.read(bytes);
 				String s = new String(bytes, "utf-8");
-				s = s.replaceAll("( )( )+", "");// 去掉字符中间多于2个的空格
-				s = s.trim();// 去掉首尾多余的空格
-				String[] yuanzu = s.split(" ");// 按空格分割元组
-				sumList = new long[yuanzu.length + 1];// 求和数组共有元组个数加一项，多的一项为为补充0.0f的
+				s = s.replaceAll("( )( )+", "");
+				s = s.trim();
+				String[] yuanzu = s.split(" ");
+				sumList = new long[yuanzu.length + 1];
 				for (int i = 0; i < yuanzu.length; i++) {
 					yuanzu[i] = yuanzu[i].replace("(", " ");
 					yuanzu[i] = yuanzu[i].replace(")", " ");
 					yuanzu[i] = yuanzu[i].trim();
 					String[] px = yuanzu[i].split(",");
 					if (px.length != 3) {
-						System.out.println("参数格式不正确！");
+						System.out.println("The parameter format is incorrect！");
 						System.exit(0);
 					}
 					float min = Float.parseFloat(px[0]);
@@ -114,13 +112,7 @@ public class GreaterThan {
 			}
 		}
 
-		/**
-		 * 辅助函数，bytes转int
-		 * 
-		 * @param b
-		 * @param start
-		 * @return
-		 */
+
 		public int fromBytestoInt(byte[] b, int start) {
 			int temp;
 			if (b.length >= start + 4)
@@ -131,13 +123,7 @@ public class GreaterThan {
 			return temp;
 		}
 
-		/**
-		 * 辅助函数，bytes转Float
-		 * 
-		 * @param b
-		 * @param start
-		 * @return
-		 */
+
 		public Float fromBytestoFloat(byte[] b, int start) {
 			float temp;
 			int tempi = fromBytestoInt(b, start);
@@ -151,15 +137,14 @@ public class GreaterThan {
 		public void reduce(LongWritable key, Iterable<BytesWritable> values, Context context)
 				throws IOException, InterruptedException {
 			Iterator<BytesWritable> ite = values.iterator();
-			// 利用valueList准备存储values中的所有值
 			byte[] valueBytes = ite.next().copyBytes();
 			float currentElevation, currentSlope;
-			int length = valueBytes.length;// 字节数组长度
+			int length = valueBytes.length;
 			float[] change_tile = new float[length / 4 - 1];
 
 			for (int j = 4; j < length; j += 4) {
 				currentElevation = fromBytestoFloat(valueBytes, j);
-				if (currentElevation == INVAILDDATA ) { // 如果高程或坡度值是无效值，则结果值也为无效值
+				if (currentElevation == INVAILDDATA ) {
 					change_tile[j / 4 - 1] = INVAILDDATA;
 					continue;
 				}
@@ -205,11 +190,11 @@ public class GreaterThan {
 
 		Job job = Job.getInstance(conf, "GreaterThan_" + temp[temp.length - 1]);
 		job.setJarByClass(GreaterThan.class);
-		job.setMapperClass(MyMapper.class); // 为job设置Mapper类
-		// job.setCombinerClass(MyReducer.class); //为job设置Combiner类
-		job.setReducerClass(MyReducer.class); // 为job设置Reduce类
-		job.setOutputKeyClass(LongWritable.class); // 设置输出key的类型
-		job.setOutputValueClass(BytesWritable.class);// 设置输出value的类型
+		job.setMapperClass(MyMapper.class);
+		// job.setCombinerClass(MyReducer.class);
+		job.setReducerClass(MyReducer.class);
+		job.setOutputKeyClass(LongWritable.class);
+		job.setOutputValueClass(BytesWritable.class);
 		job.setInputFormatClass(TileInputFormat.class);
 		job.setOutputFormatClass(TileOutputFormat.class);
 		String s1 = args[0];
@@ -221,27 +206,24 @@ public class GreaterThan {
 		String outputPath = "hdfs://masters" + s3;
 		TileInputFormat.addInputPath(job, new Path(inputPath1));
 		//TileInputFormat.addInputPath(job, new Path(inputPath2));
-		TileOutputFormat.setOutputPath(job, new Path(outputPath));// 为map-reduce任务设置OutputFormat实现类
-																	// 设置输出路径
+		TileOutputFormat.setOutputPath(job, new Path(outputPath));
 		int tasksNum = Integer.parseInt(args[3]);
 		job.setNumReduceTasks(tasksNum);
 
-		long startMili = System.currentTimeMillis();// 当前时间对应的毫秒数
+		long startMili = System.currentTimeMillis();
 		if (tasksNum > 1) {
 			job.setPartitionerClass(TotalOrderPartitioner.class);
-			// RandomSampler第一个参数表示key会被选中的概率，第二个参数是一个选取samples数，第三个参数是最大读取input
-			// splits数
 			RandomSampler<LongWritable, BytesWritable> sampler = new InputSampler.RandomSampler<LongWritable, BytesWritable>(
 					0.1, 5000, 20);
 			InputSampler.writePartitionFile(job, sampler);
 			String partitionFile = TotalOrderPartitioner.getPartitionFile(conf);
-			URI partitionUri = new URI(partitionFile);// ？？
-			job.addCacheArchive(partitionUri);// 添加一个档案进行本地化
+			URI partitionUri = new URI(partitionFile);
+			job.addCacheArchive(partitionUri);
 		}
 
 		boolean state = job.waitForCompletion(true);
 		long endMili = System.currentTimeMillis();
-		System.out.println("总耗时为：" + (endMili - startMili) + "毫秒");
+		System.out.println("total time：" + (endMili - startMili) + "miniSecond");
 
 		/*
 		 * for(int i = 0;i<MyMapper.sumList.length;i++){

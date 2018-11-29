@@ -24,23 +24,23 @@ import cug.hadoop.geo.utils.TileSplitDataOutputStream;
 
 /**
  * @author root
- *将瓦片文件还原成ras文件
+ *Restore tile files to ras file
  */
 public class SplitTileFile {
 
-	private static final float INVAILDDATA=1.70141E38f;//填充的无用数据，与地图中无用数据一致，为1.70141E38
-	private int ROW;// grd数据的像素行
-	private int COL;// grd数据的像素列
+	private static final float INVAILDDATA=1.70141E38f;//Filled useless data, consistent with the useless data in the map, is 1.701141E38
+	private int ROW;// Pixel row of grd data
+	private int COL;// Pixel column of grd data
 	private short TILE_SIZE;
 
 	private double x1, x2, y1, y2; 
-	private int ROW_NUM = 0;// 数据块的行数
-	private int COL_NUM = 0;// 数据块的列数
-	//private boolean stateX;// 数据块是否需要填充X的标志
-	//private boolean stateY;// 数据头偏移量否需要填充Y的标志
+	private int ROW_NUM = 0;// Number of rows in the data block
+	private int COL_NUM = 0;// Number of columns in the data block
+	//private boolean stateX;// Whether the data block needs to fill the X mark
+	//private boolean stateY;// Data header offset does not need to fill the Y flag
 
-	private short COL_ADD;// 数据需要填充的像素列
-	private short ROW_ADD;// 数据需要填充的像素行	
+	private short COL_ADD;// The pixel column that the data needs to fill
+	private short ROW_ADD;// The row of pixels that the data needs to fill
 
 	private static RandomAccessFile raf = null;
 	private static FileInputStream fis = null;
@@ -49,7 +49,7 @@ public class SplitTileFile {
 
 	public static void main(String[] args){
 		if(args.length != 7){
-			System.out.println("需要的7参数个数不匹配，应为：gzTilePath,  grdPath, tableName, elevationRowKey, slopeRowKey, z1l, z2");
+			System.out.println("The number of 7 parameters required does not match and should be：gzTilePath,  grdPath, tableName, elevationRowKey, slopeRowKey, z1l, z2");
 			return;
 		}
 		
@@ -65,19 +65,19 @@ public class SplitTileFile {
 		 String completeResultPath= gzTilePath +"/completeResult";
 		 try {
 			 splitTileFile.init(tableName, elevationRowKey);
-			 //首先解压结果文件
+			 //First extract the result file
 			splitTileFile.decompress(gzTilePath,decompressResultPath);
-			//然后结果文件插入无效数据还原
-			System.out.println("开始插入无效块，还原ras文件......");
+			//Then the result file is inserted into invalid data restore
+			System.out.println("Start inserting invalid blocks and restore ras files......");
 			splitTileFile.insertInvaildDataBlk(tableName,elevationRowKey,slopeRowKey,decompressResultPath,completeResultPath);
-			System.out.println("还原ras文件成功！");
-			System.out.println("开始生成ras文件......");
+			System.out.println("Restore ras file successfully！");
+			System.out.println("Start generating ras files......");
 			//s.doSplit(grdPath, gzTilePath, headMsgPath,z1,z2);
 			splitTileFile.doSplit(grdPath,completeResultPath,z1,z2);
-			System.out.println("ras文件生成成功！ras文件目录："+grdPath);
+			System.out.println("The ras file was generated successfully! Ras file directory："+grdPath);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			System.out.println("生成ras文件失败");
+			System.out.println("Failed to generate ras file");
 			e.printStackTrace();
 		}finally{
 			if(raf != null){
@@ -117,14 +117,14 @@ public class SplitTileFile {
 	
 	public void doSplit(String grdPath, String tilePath,double z1,double z2) throws IOException {	
 			raf = new RandomAccessFile(tilePath, "r");
-			this.writeGrdHead(grdPath,z1,z2);//写grd文件头
-			this.writeGrdFile(grdPath);//写grd文件内容
+			this.writeGrdHead(grdPath,z1,z2);//Write grd file header
+			this.writeGrdFile(grdPath);//Write grd file content
 	}
 
 	/**
-	 * 初始化瓦片文件数据，得到头文件相关信息
+	 * Initialize tile file data to get header file related information
 	 * 
-	 * @param path
+	 * @param
 	 * @throws IOException 
 	 */
 	private void init(String tableName,String rowKey) throws IOException {
@@ -160,12 +160,12 @@ public class SplitTileFile {
 	
 	
 	/**
-	 * 插入无效块到解压后的文件中，这是总体第二部，是还原RAS文件的过程
-	 * @param tableName  表名
-	 * @param elevationRowKey 高程数据rowKey
-	 * @param slopeRowKey  坡度数据rowKey
-	 * @param decompressResultPath  tile瓦片解压后路径
-	 * @param completeResultPath 插入无效块后完整tile路径
+	 * Insert invalid block into the decompressed file, this is the second part of the whole process, which is to restore the RAS file.
+	 * @param tableName
+	 * @param elevationRowKey
+	 * @param slopeRowKey
+	 * @param decompressResultPath
+	 * @param completeResultPath
 	 * @throws IOException
 	 */
 	private void insertInvaildDataBlk(String tableName,String elevationRowKey,String slopeRowKey,String decompressResultPath,String completeResultPath) throws IOException{
@@ -175,8 +175,8 @@ public class SplitTileFile {
 		 mydos = new TileSplitDataOutputStream(new DataOutputStream(new FileOutputStream(completeResultPath)));
 		 TreeSet<Integer> invaildDataBlkNo =	getInvaildDataBlkNo(tableName,elevationRowKey,slopeRowKey);
 		 Iterator<Integer> ite = invaildDataBlkNo.iterator();
-		 int currentInvaildBlkNo =0;//当前无效块号
-		 int currentReadBlkNo = 1;//当前需要读写的块号
+		 int currentInvaildBlkNo =0;
+		 int currentReadBlkNo = 1;
 		 while(ite.hasNext()){
 			 currentInvaildBlkNo = ite.next();
 			 while(currentInvaildBlkNo-currentReadBlkNo>0){
@@ -184,14 +184,11 @@ public class SplitTileFile {
 				  mydos.write(bytes, 0, byteSize);
 				  currentReadBlkNo++;
 			 }
-			 //写出一块无用数据
 			 for(int i =0 ;i<TILE_SIZE*TILE_SIZE;i++){
 				 mydos.writeFloat(INVAILDDATA);
 			 }
-			 //写出无用数据后,当前块号需要加1
 			 currentReadBlkNo++;
 		 }
-		 //最后一个无效块插入后，后面极有可能还有有效数据需要继续写出
 		 while(ROW_NUM*COL_NUM-currentReadBlkNo>=0){
 			   fis.read(bytes, 0, byteSize);
 			   mydos.write(bytes, 0, byteSize);
@@ -203,7 +200,7 @@ public class SplitTileFile {
 
 
 	/**
-	 * 获取无效块号，存入一个TreeSet容器中
+	 * Get the invalid block number and store it in a TreeSet container
 	 * @param tableName
 	 * @param elevationRowKey
 	 * @param slopeRowKey
@@ -219,31 +216,28 @@ public class SplitTileFile {
 		
 		String[] elevationInvaildBlkArray = elevationInvaildBlk.split(" ");
 		String[] slopeInvaildBlkArray = slopeInvaildBlk.split(" ");
-		// 两个数组元素求交集，肯定无重复元素
 		TreeSet<Integer> elevationInvaildBlkSet = new TreeSet<Integer>();
 		TreeSet<Integer> slopeInvaildBlkSet = new TreeSet<Integer>();
-		//数组元素加入TreeSet集合
 		for(int i = 0 ;i <elevationInvaildBlkArray.length;i++){
 			elevationInvaildBlkSet.add(Integer.parseInt(elevationInvaildBlkArray[i]));
 		}
 		for(int i = 0 ;i <slopeInvaildBlkArray.length;i++){
 			slopeInvaildBlkSet.add(Integer.parseInt(slopeInvaildBlkArray[i]));
 		}
-		//两个set集合求交集
 		elevationInvaildBlkSet.retainAll(slopeInvaildBlkSet);
 		
 		return elevationInvaildBlkSet;	
 	}
 	/**
-	 * 瓦片文件还原为grd文件
+	 * Restore tile files to grd files
 	 * 
-	 * @param GRD_PATH
+	 * @param
 	 * @throws IOException
 	 */
 	private void writeGrdFile(String grdPath) throws IOException {
 		int byteSize = TILE_SIZE * 4;
 		byte[] bytes = new byte[byteSize];
-		fos = new FileOutputStream(grdPath, true);// 继续往grd里追加内容而不是覆盖
+		fos = new FileOutputStream(grdPath, true);
 		long startPX = 0;
 		int temp = 0;
 		int current_row = 0;
@@ -257,7 +251,7 @@ public class SplitTileFile {
 			while (temp > 1) {
 				raf.read(bytes, 0, byteSize);
 				fos.write(bytes, 0, byteSize);
-				startPX += 4L*TILE_SIZE * TILE_SIZE ;// 当前实际要读取的位置
+				startPX += 4L*TILE_SIZE * TILE_SIZE ;
 				raf.seek(startPX);
 				temp--;
 			}
@@ -269,10 +263,10 @@ public class SplitTileFile {
 
 
 	/**
-	 * 写grd头文件
-	 * @param grdPath 生成grd文件路径
-	 * @param z1 代指ZMin
-	 * @param z2 代指ZMax
+	 * Write grd header file
+	 * @param grdPath Generate grd file path
+	 * @param z1 ZMin
+	 * @param z2 ZMax
 	 */
 	private void writeGrdHead(String grdPath,double z1,double z2) {
 		RasHead rasHead = new RasHead(ROW, COL,x1, x2, y1, y2,z1,z2);
@@ -281,7 +275,7 @@ public class SplitTileFile {
 	}
 
 	/**
-	 * 解压原始文件，生成解压后的tile文件，这是处理第一步
+	 * Unzip the original file and generate the decompressed tile file. This is the first step.
 	 * @param gzTilePath
 	 * @param decompressResultPath
 	 */
@@ -289,14 +283,13 @@ public class SplitTileFile {
 		File dir = new File(gzTilePath);
 		
 		File newFile = new File(decompressResultPath);
-		if(newFile.exists()){//如果存在就先删除
+		if(newFile.exists()){
 			//newDir.delete();
-			System.out.println("tile文件解压拼接完成!");
+			System.out.println("Tile file decompression stitching completed!");
 			return;
 		}	
 	//	File[] contentFile = dir.listFiles();
 		List<File> files = Arrays.asList(dir.listFiles());
-		//解压文件以文件名排序
 		Collections.sort(files, new Comparator<File>() {
 			   public int compare(File o1, File o2) {
 				if (o1.isDirectory() && o2.isFile())
@@ -322,11 +315,11 @@ public class SplitTileFile {
 			      while ((len = GZIPin.read(buf)) > 0) {
 			          fos1.write(buf, 0, len);
 			        }
-			      System.out.println(fileName+"解压完成");
+			      System.out.println(fileName+"Decompression completed");
 			      //GZIPin.close();
 				}
 			}
-			System.out.println("tile文件解压拼接完成!");
+			System.out.println("Tile file decompression stitching completed!");
 			//fos.close();
 	    }catch(IOException e){		
 	    
